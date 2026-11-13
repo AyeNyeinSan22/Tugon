@@ -4,7 +4,7 @@ export type AppLanguage = 'EN' | 'FIL'
 
 const filipino: Record<string, string> = {
   'DEMONSTRATION · Reports are not sent to government. Sample data is fictional.': 'DEMONSTRASYON · Hindi ipinapadala sa pamahalaan ang mga ulat. Kathang-isip ang datos.',
-  'Tugon is a community reporting platform for problems with public projects. Share what you noticed and where it happened, then follow visible updates as the report is reviewed.': 'Plataporma ang Tugon para makapag-ulat ang komunidad ng mga problema sa pampublikong proyekto. Ibahagi kung ano ang napansin at kung saan ito nangyari, pagkatapos ay sundan ang mga update habang sinusuri ang ulat.',
+  'Tugon is a community reporting platform for problems with public projects. Share what you noticed and where it happened, then follow visible updates as the report is reviewed.': 'Ang Tugon ay isang plataporma para makapag-ulat ang komunidad ng mga problema sa pampublikong proyekto. Ibahagi kung ano ang napansin at kung saan ito nangyari, pagkatapos ay sundan ang mga update habang sinusuri ang ulat.',
   'Your voice. Visible progress.': 'Boses mo. Progresong nakikita.', 'Emergency? Call 911 or your local emergency hotline.': 'May emerhensiya? Tumawag sa 911 o lokal na emergency hotline.', '12 days · confirmed by reporters': '12 araw · kinumpirma ng mga nag-ulat',
   'Potholes, cracks, sinking surface': 'Lubak, bitak, lumulubog na kalsada', 'Clogged canals, flooding spots': 'Baradong kanal, bahaging binabaha', 'Work stopped or abandoned': 'Nahinto o iniwan ang gawain', 'Open pits, no barriers or signs': 'Bukas na hukay, walang harang o babala',
   'Map legend': 'Legend ng mapa', 'Safe': 'Ligtas', 'Caution': 'Mag-ingat', 'Danger': 'Panganib', 'Your location': 'Lokasyon mo',
@@ -26,7 +26,7 @@ const filipino: Record<string, string> = {
   'Is anyone at risk of getting hurt?': 'May nanganganib bang masaktan?', 'Is it near a school, hospital, or main road?': 'Malapit ba ito sa paaralan, ospital, o pangunahing kalsada?', 'Is it getting worse?': 'Lumalala ba ito?',
   'Skip for now': 'Laktawan muna', 'Send answers': 'Ipadala ang mga sagot', 'Thanks for helping your community.': 'Salamat sa pagtulong sa iyong komunidad.', 'Your report is ready in this demonstration. It has not been saved or sent to government.': 'Handa na ang ulat sa demonstrasyong ito. Hindi ito na-save o ipinadala sa pamahalaan.',
   'Report a problem': 'Mag-ulat ng problema', 'Track my report': 'Subaybayan ang ulat', 'Public progress': 'Pampublikong progreso', 'How it works': 'Paano ito gumagana', 'Help': 'Tulong',
-  'NO ACCOUNT NEEDED · TAKES ABOUT 3 MINUTES': 'WALANG KAILANGANG ACCOUNT · MGA 3 MINUTO',
+  'COMMUNITY INFRASTRUCTURE REPORTING': 'ULAT SA IMPRASTRAKTURE NG KOMUNIDAD',
   'See a problem with a public project? Tell us.': 'May problema ba sa pampublikong proyekto? Ipaalam ito sa amin.',
   'ROAD SAFETY OVERVIEW': 'PANGKALAHATANG-IDEYA SA KALIGTASAN NG KALSADA', 'Know the road before you go': 'Alamin ang kalagayan ng kalsada bago bumiyahe',
   'Batangas City, Philippines': 'Lungsod ng Batangas, Pilipinas', 'Sample map area · not live road-condition data': 'Halimbawang mapa · hindi live na datos sa kondisyon ng kalsada',
