@@ -16,9 +16,12 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import ReportFlow from './ReportFlow'
+import OfficerDashboard from './OfficerDashboard'
+import TrackAuth from './TrackAuth'
 import RoadSafetyMap from './RoadSafetyMap'
 import FaqSection from './FaqSection'
 import { useLanguage } from './LanguageProvider'
+import { supabase, isSupabaseConfigured } from './lib/supabase'
 
 const HERO_IMAGE_SRC = '/hero-road.jpg'
 
@@ -143,6 +146,12 @@ function RoutePageLayout({ children, current }: { children: ReactNode; current: 
                 FIL
               </button>
             </div>
+            <Link
+              to="/officer"
+              className="rounded-lg bg-[#0f2342] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#1e3a8a]"
+            >
+              {t('Officer login')}
+            </Link>
             <Link to="/how-it-works" className="hidden text-sm font-medium text-[#0f2342] lg:block">
               {t('Help')}
             </Link>
@@ -159,7 +168,9 @@ function RoutePageLayout({ children, current }: { children: ReactNode; current: 
             {t('Your voice. Visible action.')}
           </span>
           <span className="font-medium text-red-600">Emergency? Call 911 or your local DRRMO.</span>
-          <span>Privacy · Help &amp; coverage · Staff workspace</span>
+          <span>
+            Privacy · Help &amp; coverage · <Link to="/officer">Staff workspace</Link>
+          </span>
         </div>
       </footer>
     </div>
@@ -243,17 +254,61 @@ function TrackPage() {
   const { t } = useLanguage()
   const [reportId, setReportId] = useState('')
   const [activeRef, setActiveRef] = useState<string | null>(null)
+  const [liveRecord, setLiveRecord] = useState<DemoReportRecord | null>(null)
   const [notFound, setNotFound] = useState(false)
+  const [looking, setLooking] = useState(false)
 
-  const handleLookup = (refCode: string) => {
+  const statusToTrack = (status: string): Pick<DemoReportRecord, 'status' | 'currentStep' | 'timeline'> => {
+    if (status === 'resolved') {
+      return { status: 'Resolved', currentStep: 3, timeline: ['Received', 'Reviewed', 'Resolved'] }
+    }
+    if (status === 'in_progress') {
+      return { status: 'Sent to office', currentStep: 2, timeline: ['Received', 'With the office', 'Next update pending'] }
+    }
+    return { status: 'Under review', currentStep: 2, timeline: ['Received', 'Under review', 'Next update pending'] }
+  }
+
+  const handleLookup = async (refCode: string) => {
     const normalized = refCode.trim().toUpperCase()
     if (!normalized) return
     setReportId(normalized)
+    setLiveRecord(null)
+    setActiveRef(null)
+    setNotFound(false)
+
+    if (isSupabaseConfigured && supabase) {
+      setLooking(true)
+      const { data, error } = await supabase
+        .from('reports')
+        .select('tracking_code, problem, address, landmark, status, created_at')
+        .eq('tracking_code', normalized)
+        .maybeSingle()
+      setLooking(false)
+
+      if (!error && data) {
+        const track = statusToTrack(data.status)
+        setLiveRecord({
+          ref: data.tracking_code,
+          title: data.problem || 'Reported issue',
+          location: data.landmark || data.address || 'Location provided',
+          category: data.problem || 'Report',
+          CategoryIcon: Route,
+          ...track,
+          timeline: [
+            new Date(data.created_at).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' }),
+            track.timeline[1],
+            track.timeline[2],
+          ],
+        })
+        return
+      }
+      // Fall through to demo lookup if the table isn't ready yet
+    }
+
     if (DEMO_REPORTS[normalized]) {
       setActiveRef(normalized)
       setNotFound(false)
     } else {
-      setActiveRef(null)
       setNotFound(true)
     }
   }
@@ -263,11 +318,12 @@ function TrackPage() {
     handleLookup(reportId)
   }
 
-  const record = activeRef ? DEMO_REPORTS[activeRef] : null
+  const record = liveRecord ?? (activeRef ? DEMO_REPORTS[activeRef] : null)
   const theme = record ? trackStatusThemes[record.status] : null
 
   return (
     <RoutePageLayout current="/track">
+      <TrackAuth>
       <div className="mx-auto max-w-2xl">
         {/* Lookup Card with Dual-Tone Royal Blue & Civic Orange Top Bar */}
         <section
@@ -305,14 +361,15 @@ function TrackPage() {
                   }}
                   required
                   className="form-control flex-1"
-                  placeholder={t('e.g. TUG-2026-0124')}
+                  placeholder={t('e.g. TG-A1B2C3')}
                 />
                 <button
                   type="submit"
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#172554]"
+                  disabled={looking}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-[#1e3a8a] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#172554] disabled:opacity-60"
                 >
                   <Search size={15} aria-hidden="true" />
-                  <span>{t('Find report')}</span>
+                  <span>{looking ? t('Finding…') : t('Find report')}</span>
                 </button>
               </div>
             </form>
@@ -329,7 +386,7 @@ function TrackPage() {
               {t('No report found for')} <span className="font-mono text-[#be123c]">{reportId}</span>
             </p>
             <p className="mt-1 text-xs">
-              {t('Check your reference code and try again (e.g. TUG-2026-0124).')}
+              {t('Check your reference code and try again (e.g. TG-A1B2C3).')}
             </p>
           </div>
         )}
@@ -410,14 +467,17 @@ function TrackPage() {
               })}
             </ol>
 
-            {/* Sample Disclaimer Notice */}
-            <div className="relative mt-4 flex items-center gap-2 rounded-lg bg-[#fff7ed] px-3.5 py-2.5 text-[11px] font-medium text-[#9a3412]">
-              <AlertTriangle size={14} className="shrink-0 text-[#ea580c]" />
-              <span>{t('This is sample progress for the demonstration. No real report records are connected.')}</span>
-            </div>
+            {/* Sample Disclaimer Notice — only for demo records */}
+            {!liveRecord && (
+              <div className="relative mt-4 flex items-center gap-2 rounded-lg bg-[#fff7ed] px-3.5 py-2.5 text-[11px] font-medium text-[#9a3412]">
+                <AlertTriangle size={14} className="shrink-0 text-[#ea580c]" />
+                <span>{t('This is sample progress for the demonstration. No real report records are connected.')}</span>
+              </div>
+            )}
           </article>
         )}
       </div>
+      </TrackAuth>
     </RoutePageLayout>
   )
 }
@@ -529,6 +589,12 @@ function ProgressPage() {
                 FIL
               </button>
             </div>
+            <Link
+              to="/officer"
+              className="rounded-lg bg-[#0f2342] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#1e3a8a]"
+            >
+              {t('Officer login')}
+            </Link>
             <Link to="/how-it-works" className="hidden text-sm font-medium text-[#0f2342] lg:block">
               {t('Help')}
             </Link>
@@ -658,7 +724,9 @@ function ProgressPage() {
             {t('Your voice. Visible action.')}
           </span>
           <span className="font-medium text-red-600">{t('Emergency? Call 911 or your local DRRMO.')}</span>
-          <span>Privacy · Help &amp; coverage · Staff workspace</span>
+          <span>
+            Privacy · Help &amp; coverage · <Link to="/officer">Staff workspace</Link>
+          </span>
         </div>
       </footer>
     </div>
@@ -901,6 +969,12 @@ function HomePage() {
             <a href="#footer" className="hidden text-sm font-medium text-[#0f2342] sm:inline">
               {t('Help')}
             </a>
+            <Link
+              to="/officer"
+              className="rounded-lg bg-[#0f2342] px-3.5 py-1.5 text-xs font-bold text-white transition hover:bg-[#1e3a8a]"
+            >
+              {t('Officer login')}
+            </Link>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="grid size-9 place-items-center rounded-md border border-[#d8e0ea] text-[#0f2342] md:hidden"
@@ -1163,7 +1237,8 @@ function HomePage() {
           <p>
             <a href="#footer" className="hover:text-[#1e3a8a]">{t('Privacy')}</a> ·{' '}
             <a href="#footer" className="hover:text-[#1e3a8a]">{t('Help & coverage')}</a> ·{' '}
-            <a href="#footer" className="hover:text-[#1e3a8a]">{t('About')}</a>
+            <a href="#footer" className="hover:text-[#1e3a8a]">{t('About')}</a> ·{' '}
+            <Link to="/officer" className="font-semibold hover:text-[#1e3a8a]">{t('Staff workspace')}</Link>
           </p>
         </div>
       </footer>
@@ -1205,6 +1280,7 @@ function App() {
       <RouterRoute path="/track" element={<TrackPage />} />
       <RouterRoute path="/progress" element={<ProgressPage />} />
       <RouterRoute path="/how-it-works" element={<HowItWorksPage />} />
+      <RouterRoute path="/officer" element={<OfficerDashboard />} />
       <RouterRoute path="*" element={<NotFound />} />
     </Routes>
   )

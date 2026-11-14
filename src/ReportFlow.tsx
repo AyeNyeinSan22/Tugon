@@ -1,5 +1,6 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { supabase, isSupabaseConfigured } from './lib/supabase'
 import {
   AlertTriangle,
   ArrowLeft,
@@ -140,6 +141,9 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
   const [questions, setQuestions] = useState(['', '', ''])
   const [summaryReviewed, setSummaryReviewed] = useState(false)
   const [finished, setFinished] = useState(false)
+  const [trackingCode, setTrackingCode] = useState('')
+  const [submitError, setSubmitError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [geoMessage, setGeoMessage] = useState('')
 
   const setField = <K extends keyof Report>(key: K, value: Report[K]) =>
@@ -168,9 +172,50 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
     )
   }
 
-  const finish = (event?: FormEvent) => {
+  const generateTrackingCode = () => {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    let code = ''
+    for (let i = 0; i < 6; i += 1) code += alphabet[Math.floor(Math.random() * alphabet.length)]
+    return `TG-${code}`
+  }
+
+  const finish = async (event?: FormEvent) => {
     event?.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
+    setSubmitError('')
+
+    const code = generateTrackingCode()
+
+    if (!isSupabaseConfigured || !supabase) {
+      // Offline demo mode: show a code without persisting
+      setTrackingCode(code)
+      setFinished(true)
+      setSubmitting(false)
+      return
+    }
+
+    const { error } = await supabase.from('reports').insert({
+      tracking_code: code,
+      problem: report.problem,
+      address: report.address,
+      landmark: report.landmark,
+      description: report.description,
+      timing: report.timing,
+      phone: report.phone,
+      risk_questions: questions,
+      status: 'new',
+    })
+
+    if (error) {
+      setSubmitError('Could not send your report. Please check your connection and try again.')
+      setSubmitting(false)
+      return
+    }
+
+    setTrackingCode(code)
     setFinished(true)
+    setSubmitting(false)
   }
 
   const canContinue =
@@ -243,6 +288,13 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
                   </button>
                 ))}
               </div>
+              <Link
+                to="/officer"
+                onClick={onClose}
+                className="rounded-lg bg-[#0f2342] px-3 py-1.5 text-xs font-bold text-white transition hover:bg-[#1e3a8a]"
+              >
+                {t('Officer login')}
+              </Link>
               <Link to="/how-it-works" onClick={onClose} className="ml-1 hidden font-medium text-[#0f2342] sm:inline">
                 {t('Help')}
               </Link>
@@ -283,8 +335,25 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
                 </span>
                 <h1 className="mt-4 text-2xl font-bold text-[#0f2342]">{t('Thanks for helping your community.')}</h1>
                 <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[#475569]">
-                  {t('Your report is ready in this demonstration. It has not been saved or sent to government.')}
+                  {t('Your report has been sent. Save the tracking ID below to check its progress.')}
                 </p>
+                {trackingCode && (
+                  <div className="mx-auto mt-5 max-w-xs rounded-xl border-2 border-dashed border-[#1e3a8a]/40 bg-[#eff6ff] px-6 py-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-[#475569]">
+                      {t('Your tracking ID')}
+                    </p>
+                    <p className="mt-1 font-mono text-2xl font-extrabold tracking-wider text-[#1e3a8a]">
+                      {trackingCode}
+                    </p>
+                  </div>
+                )}
+                <Link
+                  to="/track"
+                  onClick={onClose}
+                  className="mt-4 inline-block text-sm font-semibold text-[#1e3a8a] underline-offset-4 hover:underline"
+                >
+                  {t('Track this report')} →
+                </Link>
                 <button
                   type="button"
                   onClick={onClose}
@@ -643,21 +712,28 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
                         onChange={(v) => setQuestions((q) => [q[0], q[1], v])}
                       />
                     </div>
+                    {submitError && (
+                      <p className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs font-medium text-red-700" role="alert">
+                        {submitError}
+                      </p>
+                    )}
                     <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-[#e2e8f0] pt-5">
                       <button
                         type="button"
                         onClick={() => finish()}
-                        className="rounded-lg border border-[#cbd5e1] px-5 py-2.5 text-xs font-semibold text-[#334155] hover:bg-[#f8fafc]"
+                        disabled={submitting}
+                        className="rounded-lg border border-[#cbd5e1] px-5 py-2.5 text-xs font-semibold text-[#334155] hover:bg-[#f8fafc] disabled:opacity-50"
                       >
                         {t('Skip for now')}
                       </button>
                       <button
                         type="button"
                         onClick={() => finish()}
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#facc15] px-6 py-2.5 text-xs font-bold text-[#0f2342] hover:bg-[#eab308]"
+                        disabled={submitting}
+                        className="inline-flex items-center gap-1.5 rounded-lg bg-[#facc15] px-6 py-2.5 text-xs font-bold text-[#0f2342] hover:bg-[#eab308] disabled:opacity-50"
                       >
-                        {t('Send answers')}
-                        <ArrowRight size={14} />
+                        {submitting ? t('Sending…') : t('Send answers')}
+                        {!submitting && <ArrowRight size={14} />}
                       </button>
                     </div>
                   </>
@@ -672,7 +748,10 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
             <span>TUGON · {t('Your voice. Visible action.')}</span>
             <span className="font-medium text-red-600">{t('Emergency? Call 911 or your local DRRMO.')}</span>
             <span>
-              {t('Privacy')} · {t('Help & coverage')} · {t('Staff workspace')}
+              {t('Privacy')} · {t('Help & coverage')} ·{' '}
+              <Link to="/officer" onClick={onClose} className="font-semibold text-[#1e3a8a]">
+                {t('Staff workspace')}
+              </Link>
             </span>
           </div>
         </footer>
