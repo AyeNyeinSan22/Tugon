@@ -1,28 +1,100 @@
 import { useState } from 'react'
-import { Minus, Plus } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { useLanguage } from './LanguageProvider'
 
-const questions = [
-  ['Who can submit a report?', 'Anyone who notices a problem with a public project can start a report. The demonstration does not require an account. Include a location and a clear description so the issue can be understood.'],
-  ['Does every report lead to government action?', 'Not necessarily. A live service would need to review each report and determine which office is responsible and what action is appropriate. This prototype does not send reports to a government office.'],
-  ['Does it cost anything?', 'This prototype is free to explore and does not require an account. It does not accept or send real reports.'],
-  ['What should I do in an emergency?', 'Tugon is not an emergency service. If someone is in immediate danger, call 911 or your local DRRMO first.'],
-  ['Will my location or phone number be public?', 'In this prototype, your information is not stored or submitted. The map only uses your current location to recenter after you choose “Use my current location” and grant browser permission.'],
-  ['Can I track a report later?', 'A live service should provide a reference number for follow-up. The tracking page in this prototype displays sample data only; it is not connected to submitted reports.'],
+const faqItems = [
+  {
+    question: 'Who can submit a report?',
+    answer:
+      'Anyone who notices a problem with a public project can start a report. The demonstration does not require an account. Include a location and a clear description so the issue can be understood.',
+  },
+  {
+    question: 'Does every report lead to government action?',
+    answer:
+      'No. Reports are reviewed by staff to verify completeness, check duplicate submissions, and determine if they meet the criteria for routing to local engineering offices.',
+  },
+  {
+    question: 'Who reviews my report and decides what action to take?',
+    answer:
+      'Government staff review every report. Automated summaries only help organize details and group nearby submissions—human officers verify urgency and route cases to the responsible office.',
+  },
+  {
+    question: 'What if there is an immediate safety hazard or emergency?',
+    answer:
+      'If anyone is in immediate danger—such as a live electrical wire, active structural collapse, or severe flash flooding—call 911 or your local DRRMO first before submitting a report here.',
+  },
 ]
 
 export default function FaqSection() {
-  const [openQuestion, setOpenQuestion] = useState<number | null>(0)
   const { t } = useLanguage()
+  const [openIndex, setOpenIndex] = useState<number | null>(0)
 
-  return <section id="faq" className="rounded-xl border border-[#d5dee5] bg-[#e8f3f1] px-5 py-6 text-[#153550] shadow-sm sm:px-8 sm:py-8" aria-labelledby="faq-title">
-    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#176b70]">{t('TUGON · COMMON QUESTIONS')}</p>
-    <h2 id="faq-title" className="mt-2 text-2xl font-bold sm:text-[28px]">{t('Before you send a report')}</h2>
-    <div className="mt-5 divide-y divide-[#cfdddf] border-y border-[#cfdddf]">
-      {questions.map(([question, answer], index) => <div key={question}>
-        <h3><button type="button" onClick={() => setOpenQuestion(openQuestion === index ? null : index)} aria-expanded={openQuestion === index} aria-controls={`faq-answer-${index}`} className="flex w-full items-center justify-between gap-5 py-4 text-left text-sm font-semibold text-[#153550] hover:text-[#10565a] sm:text-base"><span>{t(question)}</span>{openQuestion === index ? <Minus className="shrink-0" size={17}/> : <Plus className="shrink-0" size={17}/>}</button></h3>
-        {openQuestion === index && <p id={`faq-answer-${index}`} className="faq-answer max-w-2xl pb-4 pr-8 text-sm leading-6 text-[#516575]">{t(answer)}</p>}
-      </div>)}
-    </div>
-  </section>
+  const toggle = (index: number) => {
+    setOpenIndex((current) => (current === index ? null : index))
+  }
+
+  return (
+    <section
+      aria-labelledby="faq-heading"
+      className="relative overflow-hidden rounded-2xl border border-[#cbd5e1] bg-[#eaf2fc] shadow-[0_6px_24px_rgba(15,35,66,0.04)]"
+    >
+      <div className="relative p-6 sm:p-8">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#1e3a8a]">
+            {t('COMMON QUESTIONS')}
+          </p>
+          <h2 id="faq-heading" className="mt-1 text-xl font-extrabold tracking-tight text-[#0f2342] sm:text-2xl">
+            {t('Frequently asked questions')}
+          </h2>
+          <p className="mt-1 text-xs leading-5 text-[#475569] sm:text-sm">
+            {t('Quick answers about reporting public project issues, privacy, and review timelines.')}
+          </p>
+        </div>
+
+        <div className="mt-6 space-y-2.5">
+          {faqItems.map(({ question, answer }, index) => {
+            const isOpen = openIndex === index
+            return (
+              <div
+                key={question}
+                className={`overflow-hidden rounded-xl border transition-colors ${
+                  isOpen
+                    ? 'border-[#93c5fd] bg-white shadow-xs'
+                    : 'border-[#cbd5e1] bg-white hover:border-[#94a3b8]'
+                }`}
+              >
+                <h3>
+                  <button
+                    type="button"
+                    onClick={() => toggle(index)}
+                    aria-expanded={isOpen}
+                    className="flex w-full items-center justify-between gap-4 px-4 py-3.5 text-left sm:px-5"
+                  >
+                    <span className="text-sm font-bold text-[#0f2342]">{t(question)}</span>
+                    <span
+                      className={`grid size-7 shrink-0 place-items-center rounded-full transition-colors ${
+                        isOpen
+                          ? 'bg-[#1e3a8a] text-white'
+                          : 'bg-[#e2e8f0] text-[#475569]'
+                      }`}
+                    >
+                      <ChevronDown
+                        size={15}
+                        className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                      />
+                    </span>
+                  </button>
+                </h3>
+                {isOpen && (
+                  <div className="border-t border-[#e2e8f0]/80 px-4 pb-4 pt-3 text-xs leading-6 text-[#475569] sm:px-5 sm:text-sm">
+                    {t(answer)}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
 }

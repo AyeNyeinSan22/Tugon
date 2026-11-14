@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet'
 import type { LatLngExpression } from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 import { useLanguage } from './LanguageProvider'
 
 const BATANGAS_CITY: LatLngExpression = [13.7563, 121.0583]
@@ -44,7 +43,7 @@ export default function RoadSafetyMap() {
   return <div className="mt-5">
     <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div><p className="text-sm font-semibold text-[#153550]">{t('Batangas City, Philippines')}</p><p className="mt-0.5 text-xs text-[#516575]">{t('Sample map area · not live road-condition data')}</p></div>
-      <button type="button" onClick={locateUser} className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-md bg-[#176b70] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#10565a] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176b70] sm:self-auto">{t('Use my current location')}</button>
+      <button type="button" onClick={locateUser} className="inline-flex items-center gap-2 rounded-lg bg-[#1e3a8a] px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition hover:bg-[#172554]">{t('Use my current location')}</button>
     </div>
     <div className="h-[290px] overflow-hidden rounded-lg border border-[#d5dee5] bg-[#eef2f5] sm:h-[370px]" role="region" aria-label="Road safety sample map centered on Batangas City">
       <MapContainer center={BATANGAS_CITY} zoom={13} scrollWheelZoom className="h-full w-full">
