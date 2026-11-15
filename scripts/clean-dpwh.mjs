@@ -1,9 +1,12 @@
-// Cleans the raw DPWH records into the CSV the Public progress page reads.
+// Cleans the raw DPWH records into a tidy CSV.
 //
 //   node scripts/clean-dpwh.mjs
 //
 // Input : data/dpwh/raw_dpwh_alangilan.csv   (values exactly as shown on the DPWH portal)
-// Output: src/data/dpwh_projects_clean.csv   (one tidy row per contract)
+// Output: data/dpwh/clean_dpwh_alangilan.csv (one tidy row per contract)
+//
+// These records are kept for reference only. The Public progress page no longer
+// shows them: it now shows cases that officers publish (src/lib/cases.ts).
 //
 // Cleaning rules
 //  - contract            -> contract_id + description (split at the first " - ")
@@ -19,7 +22,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const RAW = 'data/dpwh/raw_dpwh_alangilan.csv'
-const OUT = 'src/data/dpwh_projects_clean.csv'
+const OUT = 'data/dpwh/clean_dpwh_alangilan.csv'
 const RETRIEVED_ON = '2026-11-15'
 
 // The portal's status -> the three labels shown on the page.

@@ -20,7 +20,7 @@ import OfficerDashboard from './OfficerDashboard'
 import TrackAuth from './TrackAuth'
 import RoadSafetyMap from './RoadSafetyMap'
 import FaqSection from './FaqSection'
-import PublicProjects from './PublicProjects'
+import { CaseDetail, PublicCaseList, ReportCaseLink } from './CasesPublic'
 import { useLanguage } from './LanguageProvider'
 import { supabase, isSupabaseConfigured } from './lib/supabase'
 
@@ -468,6 +468,9 @@ function TrackPage() {
               })}
             </ol>
 
+            {/* Shortcut to the public case this report belongs to, when one is published */}
+            <ReportCaseLink trackingCode={record.ref} />
+
             {/* Sample Disclaimer Notice — only for demo records */}
             {!liveRecord && (
               <div className="relative mt-4 flex items-center gap-2 rounded-lg bg-[#fff7ed] px-3.5 py-2.5 text-[11px] font-medium text-[#9a3412]">
@@ -483,53 +486,8 @@ function TrackPage() {
   )
 }
 
-const publicCases = [
-  {
-    id: 'TUG-2026-0124',
-    title: 'Deep pothole on Mabini Street',
-    area: 'Brgy. Sample',
-    category: 'Damaged road',
-    status: 'Under review',
-    updated: 'Updated Nov 11',
-    Icon: Route,
-    iconBg: 'bg-[#eff6ff] text-[#1e3a8a]',
-    orbBg: 'bg-[#dbeafe]/65',
-    cardHover: 'hover:border-[#1e3a8a] hover:bg-gradient-to-br hover:from-[#eff6ff]/70 hover:to-white',
-    linkColor: 'text-[#1e3a8a]',
-  },
-  {
-    id: 'TUG-2026-0118',
-    title: 'Drainage cleared on Mabini St.',
-    area: 'Brgy. Sample',
-    category: 'Blocked drainage',
-    status: 'Resolved',
-    updated: 'Resolved Nov 10',
-    Icon: Droplets,
-    iconBg: 'bg-[#e0f2fe] text-[#0369a1]',
-    orbBg: 'bg-[#bae6fd]/60',
-    cardHover: 'hover:border-[#0284c7] hover:bg-gradient-to-br hover:from-[#f0f9ff]/70 hover:to-white',
-    linkColor: 'text-[#0369a1]',
-  },
-  {
-    id: 'TUG-2026-0109',
-    title: 'Safety barriers requested',
-    area: 'Sample Avenue',
-    category: 'Unsafe construction',
-    status: 'Sent to office',
-    updated: 'Updated Nov 9',
-    Icon: ShieldAlert,
-    iconBg: 'bg-[#fef2f2] text-[#be123c]',
-    orbBg: 'bg-[#fecdd3]/60',
-    cardHover: 'hover:border-[#be123c] hover:bg-gradient-to-br hover:from-[#fff1f2]/70 hover:to-white',
-    linkColor: 'text-[#be123c]',
-  },
-]
-
 function ProgressPage() {
   const { language, setLanguage, t } = useLanguage()
-  const [filter, setFilter] = useState('All reports')
-  const visibleCases = publicCases.filter((item) => filter === 'All reports' || item.status === filter)
-  const filters = ['All reports', 'Under review', 'Sent to office', 'Resolved']
   const navItems = [
     ['/report', 'Report a problem'],
     ['/track', 'Track my report'],
@@ -626,98 +584,18 @@ function ProgressPage() {
                 {t('Public progress')}
               </h1>
               <p className="mt-1.5 max-w-xl text-sm leading-6 text-slate-100">
-                {t('See how sample community reports move through review and action.')}
+                {t('Cases the office opened because of community reports. Follow each stage and the photos officers post as the work goes on.')}
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/25 bg-white/12 px-4 py-3 text-sm text-white backdrop-blur-sm">
-              <strong className="text-2xl font-extrabold text-[#facc15]">12</strong>
-              <span className="ml-2 text-xs font-medium text-slate-100">{t('sample reports')}</span>
-            </div>
-          </div>
-
-          {/* Filter Pills inside Hero Band */}
-          <div className="mt-6 flex flex-wrap gap-2" aria-label={t('Filter reports')}>
-            {filters.map((item) => (
-              <button
-                key={item}
-                type="button"
-                onClick={() => setFilter(item)}
-                aria-pressed={filter === item}
-                className={`rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${
-                  filter === item
-                    ? 'border-[#facc15] bg-[#facc15] text-[#0f2342] shadow-xs'
-                    : 'border-white/30 bg-white/10 text-white backdrop-blur-xs hover:bg-white/20'
-                }`}
-              >
-                {t(item)}
-              </button>
-            ))}
           </div>
         </div>
       </section>
 
       {/* Overlapping Floating White Panel with Category-Styled Report Cards */}
       <main className="route-main mx-auto -mt-16 w-full max-w-[1080px] flex-1 px-5 pb-12 sm:-mt-20 sm:px-8">
-        <div className="rounded-2xl border border-[#d8e0ea] bg-white p-5 shadow-[0_12px_32px_rgba(15,35,66,0.08)] sm:p-7">
-          <div className="space-y-3.5">
-            {visibleCases.map(({ id, title, area, category, status, updated, Icon, iconBg, orbBg, cardHover, linkColor }) => (
-              <article
-                key={id}
-                className={`group relative flex flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-[#e2e8f0] bg-white p-5 shadow-[0_4px_16px_rgba(15,35,66,0.03)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(15,35,66,0.07)] sm:flex-row sm:items-center ${cardHover}`}
-              >
-                {/* Decorative Top-Right Quarter-Circle Orb (matching category cards) */}
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none absolute -right-7 -top-7 size-28 rounded-full transition-transform duration-300 group-hover:scale-110 ${orbBg}`}
-                />
-
-                <div className="relative flex items-start gap-4">
-                  <span
-                    className={`grid size-12 shrink-0 place-items-center rounded-xl transition-transform duration-200 group-hover:scale-105 ${iconBg}`}
-                  >
-                    <Icon size={22} strokeWidth={2.1} aria-hidden="true" />
-                  </span>
-
-                  <div>
-                    <p className="font-mono text-xs text-[#64748b]">
-                      {id} · <span className="font-sans font-semibold text-[#475569]">{t(category)}</span>
-                    </p>
-                    <h2 className="mt-1 text-base font-extrabold text-[#0f2342]">{t(title)}</h2>
-                    <p className="mt-0.5 text-xs text-[#475569]">
-                      {t(area)} · {t(updated)}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="relative flex items-center justify-between gap-3.5 sm:justify-end">
-                  <span
-                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                      status === 'Resolved'
-                        ? 'bg-[#e6f4ea] text-[#1e6b3a]'
-                        : 'border border-[#fed7aa] bg-[#fff7ed] text-[#c2410c]'
-                    }`}
-                  >
-                    {t(status)}
-                  </span>
-                  <Link
-                    to="/track"
-                    className={`inline-flex items-center gap-1 text-sm font-bold hover:underline ${linkColor}`}
-                  >
-                    {t('Details →')}
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <p className="mt-5 rounded-xl bg-[#fff7ed] p-3.5 text-xs leading-5 text-[#9a3412]">
-            {t('Demonstration only. Sample data is fictional and does not represent live government service records.')}
-          </p>
-        </div>
-
-        {/* Real DPWH contract records near BatStateU Alangilan (cleaned CSV in src/data) */}
-        <PublicProjects />
+        {/* Cases published by officers (see src/CasesPublic.tsx and src/lib/cases.ts) */}
+        <PublicCaseList />
       </main>
 
       {/* Consistent Footer */}
@@ -1283,6 +1161,14 @@ function App() {
       <RouterRoute path="/report" element={<ReportRoute />} />
       <RouterRoute path="/track" element={<TrackPage />} />
       <RouterRoute path="/progress" element={<ProgressPage />} />
+      <RouterRoute
+        path="/progress/:caseCode"
+        element={
+          <RoutePageLayout current="/progress">
+            <CaseDetail />
+          </RoutePageLayout>
+        }
+      />
       <RouterRoute path="/how-it-works" element={<HowItWorksPage />} />
       <RouterRoute path="/officer" element={<OfficerDashboard />} />
       <RouterRoute path="*" element={<NotFound />} />
