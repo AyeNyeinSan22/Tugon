@@ -19,6 +19,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useLanguage } from './LanguageProvider'
 import { supabase, isSupabaseConfigured } from './lib/supabase'
 import type { ReportRow } from './lib/supabase'
+import OfficerCases from './OfficerCases'
 
 type StatusFilter = 'all' | ReportRow['status']
 
@@ -527,6 +528,9 @@ export default function OfficerDashboard() {
           {t('No reports match this filter.')}
         </p>
       )}
+
+      {/* Public progress cases built from these reports */}
+      <OfficerCases reports={items.map((item) => ({ id: item.id, trackingCode: item.tracking_code, label: `${item.problem} · ${item.address}` }))} />
 
       <p className="mt-6 text-xs leading-5 text-[#8998a5]">
         {t('Demonstration workspace · status changes persist only when Supabase is connected.')}
