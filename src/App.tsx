@@ -20,6 +20,7 @@ import OfficerDashboard from './OfficerDashboard'
 import TrackAuth from './TrackAuth'
 import RoadSafetyMap from './RoadSafetyMap'
 import FaqSection from './FaqSection'
+import PublicProjects from './PublicProjects'
 import { useLanguage } from './LanguageProvider'
 import { supabase, isSupabaseConfigured } from './lib/supabase'
 
@@ -714,6 +715,9 @@ function ProgressPage() {
             {t('Demonstration only. Sample data is fictional and does not represent live government service records.')}
           </p>
         </div>
+
+        {/* Real DPWH contract records near BatStateU Alangilan (cleaned CSV in src/data) */}
+        <PublicProjects />
       </main>
 
       {/* Consistent Footer */}
