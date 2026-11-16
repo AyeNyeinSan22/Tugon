@@ -1,5 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet'
+import type { LatLngExpression } from 'leaflet'
+import L from 'leaflet'
 import { supabase, isSupabaseConfigured } from './lib/supabase'
 import {
   AlertTriangle,
@@ -85,11 +88,33 @@ const problemTypes = [
 const timingOptions = ['Today', 'This week', 'A few weeks ago', 'Months ago', 'Not sure']
 const questionOptions = ['Yes', 'No', 'Not sure']
 
+const customMarkerIcon = new L.Icon({
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+})
+
+function LocationPickerEvents({ onSelect }: { onSelect: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      onSelect(e.latlng.lat, e.latlng.lng)
+    },
+  })
+  return null
+}
+
+const DEFAULT_MAP_CENTER: [number, number] = [13.7563, 121.0583] // Batangas City
+
 type Report = {
   problem: string
   address: string
   landmark: string
   pin: boolean
+  coords?: [number, number]
   description: string
   timing: string
   phone: string
@@ -164,6 +189,7 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
     navigator.geolocation.getCurrentPosition(
       ({ coords }) => {
         setField('pin', true)
+        setField('coords', [coords.latitude, coords.longitude])
         setField('address', `${coords.latitude.toFixed(5)}, ${coords.longitude.toFixed(5)}`)
         setGeoMessage('Location added. You can refine it with a street address below.')
       },
@@ -482,35 +508,54 @@ export default function ReportFlow({ onClose }: { onClose: () => void }) {
                         <p className="mt-1.5 text-sm text-[#475569]">
                           {t('Drop a pin on the map or use your phone location. A landmark helps too.')}
                         </p>
-                        <button
-                          type="button"
-                          onClick={() => setField('pin', !report.pin)}
-                          className={`mt-5 grid h-36 w-full place-items-center rounded-xl border border-dashed text-center transition ${
-                            report.pin
-                              ? 'border-[#1e3a8a] bg-[#eff6ff]'
-                              : 'border-[#d8e0ea] bg-[#f8fafc] hover:border-[#1e3a8a]'
-                          }`}
-                        >
-                          <span>
-                            <MapPin
-                              className={`mx-auto ${report.pin ? 'text-[#1e3a8a]' : 'text-[#94a3b8]'}`}
-                              size={24}
-                              fill={report.pin ? 'currentColor' : 'none'}
-                            />
-                            <span className="mt-1.5 block text-xs font-medium text-[#475569]">
-                              {t(report.pin ? 'Pin placed · tap to move it' : 'Map · tap to drop a pin')}
+
+                        {/* Interactive Leaflet Map for Pin Placement */}
+                        <div className="mt-4 overflow-hidden rounded-xl border border-[#ccd7df] shadow-xs">
+                          <div className="h-64 w-full relative z-0">
+                            <MapContainer
+                              center={report.coords || DEFAULT_MAP_CENTER}
+                              zoom={14}
+                              scrollWheelZoom={false}
+                              className="h-full w-full"
+                            >
+                              <TileLayer
+                                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                              />
+                              <LocationPickerEvents
+                                onSelect={(lat, lng) => {
+                                  setField('pin', true)
+                                  setField('coords', [lat, lng])
+                                  if (!report.address) {
+                                    setField('address', `${lat.toFixed(5)}, ${lng.toFixed(5)}`)
+                                  }
+                                  setGeoMessage(`Pin placed at ${lat.toFixed(4)}, ${lng.toFixed(4)}`)
+                                }}
+                              />
+                              {report.pin && report.coords && (
+                                <Marker position={report.coords as LatLngExpression} icon={customMarkerIcon} />
+                              )}
+                            </MapContainer>
+                          </div>
+                          <div className="flex items-center justify-between bg-[#f8fafc] px-3.5 py-2.5 text-xs text-[#526277] border-t border-[#ccd7df]">
+                            <span className="flex items-center gap-1.5">
+                              <MapPin size={14} className={report.pin ? 'text-[#1e3a8a]' : 'text-[#8998a5]'} />
+                              {report.pin
+                                ? t('Pin placed · Click anywhere on the map to move it')
+                                : t('Click anywhere on the map to drop a pin')}
                             </span>
-                          </span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={locateMe}
-                          className="mt-3 rounded-lg bg-[#1e3a8a] px-4 py-2 text-xs font-semibold text-white hover:bg-[#172554]"
-                        >
-                          {t('Use my current location')}
-                        </button>
+                            <button
+                              type="button"
+                              onClick={locateMe}
+                              className="rounded bg-[#1e3a8a] px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-[#172554]"
+                            >
+                              {t('Use my location')}
+                            </button>
+                          </div>
+                        </div>
+
                         {geoMessage && (
-                          <p className="mt-2 text-xs text-[#475569]" role="status">
+                          <p className="mt-2 text-xs text-[#1e3a8a] font-medium" role="status">
                             {geoMessage}
                           </p>
                         )}
