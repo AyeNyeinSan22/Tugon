@@ -17,7 +17,7 @@ A community reporting platform for problems with public projects. Citizens can r
 
 ### 1. Home
 
-![Tugon home](public/home.png)
+![Tugon home](public/features/1.png)
 
 ### 2. Step-by-step report process
 
