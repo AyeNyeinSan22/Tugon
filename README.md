@@ -19,17 +19,107 @@ A community reporting platform for problems with public projects. Citizens can r
 
 ![Tugon home](public/home.png)
 
-### 2. Track your report
+### 2. Step-by-step report process
 
-![Track your report](public/track-report.png)
+The guided reporting flow takes citizens from picking a problem type to receiving a tracking ID.
 
-### 3. Public reports
+#### Step 1 — Choose a problem type
+Pick the closest match (damaged road, blocked drainage, unsafe construction, and more).
+
+![Report step 1](public/features/2.png)
+
+#### Step 2 — Add the location
+Drop a map pin or enter a street and nearby landmark so the issue can be found.
+
+![Report step 2](public/features/13.png)
+
+#### Step 3 — Tell us more (details)
+Add photos, describe what you noticed, and when you first saw it.
+
+![Report step 3](public/features/3.png)
+
+#### AI summary — Review your report
+An AI-generated draft summarizes the report before submission. Government staff make every decision — the citizen can edit or confirm.
+
+![AI summary](public/features/4.png)
+
+#### Confirmation — Tracking ID
+A tracking ID is issued so citizens can follow their report.
+
+![Confirmation](public/features/5.png)
+
+### 3. Track your report process
+
+Enter the reference number you received after reporting, then follow the review timeline.
+
+#### Search by reference
+Look up a report using its tracking ID (e.g. `TG-99EZQN`).
+
+![Track search](public/features/6.png)
+
+#### Review timeline
+See the report's progress — Report received → Under review → Office action — with its current status.
+
+![Track timeline](public/track-report.png)
+
+### 4. Public reports
 
 ![Public reports](public/public-reports.png)
 
-### 4. Admin
+### 5. Admin
 
 ![Tugon admin dashboard](public/admin.png)
+
+## Feature walkthrough
+
+### Citizen — Public site
+
+#### Home
+Landing page with hero, road safety overview map, process steps, and recently resolved cases.
+
+![Home](public/features/1.png)
+
+#### Track my report
+Look up a report by reference number and see the review timeline.
+
+![Track my report](public/features/6.png)
+
+#### How it works
+A 4-step explainer (choose → locate → describe → review) with FAQ.
+
+![How it works](public/features/7.png)
+
+### Staff workspace
+
+#### Report queue
+Prioritized queue with AI-suggested priority, project match, age, and status filters.
+
+![Report queue](public/features/8.png)
+
+#### Government projects & contracts
+Registry of active/planned projects used for automated report matching and verification.
+
+![Projects](public/features/9.png)
+
+#### Grouped reports & public cases
+Group citizen reports into verified public cases, record progress, and publish to the citizen portal.
+
+![Grouped reports](public/features/10.png)
+
+#### Post a public update
+Set new status, write a plain-language citizen message, attach before/after evidence, and publish.
+
+![Post a public update](public/features/11.png)
+
+#### Audit & accountability log
+Tamper-evident log of officer determinations, AI suggestion audits, and case updates.
+
+![Audit log](public/features/12.png)
+
+#### Report queue (alternate view)
+Another view of the prioritized queue with different filters applied.
+
+![Report queue alt](public/features/13.png)
 
 ## Team
 
@@ -39,6 +129,9 @@ A community reporting platform for problems with public projects. Citizens can r
 | Ryan | UI/UX Designer |
 | Bryan | Backend Developer |
 | Yohan | AI/Data Analyst |
+| San | Frontend Developer |
+
+🌐 [weareteamtugon.vercel.app](https://weareteamtugon.vercel.app/)
 
 ## Tech Stack
 
