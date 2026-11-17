@@ -13,9 +13,23 @@ A community reporting platform for problems with public projects. Citizens can r
 - **How it works** — Step-by-step guide with FAQ section
 - **Bilingual (EN/FIL)** — Toggle between English and Filipino, persisted in localStorage
 
-### Feature overview
+## Product views
 
-![Tugon feature overview](public/features.png)
+### 1. Home
+
+![Tugon home](public/home.png)
+
+### 2. Track your report
+
+![Track your report](public/track-report.png)
+
+### 3. Public reports
+
+![Public reports](public/public-reports.png)
+
+### 4. Admin
+
+![Tugon admin dashboard](public/admin.png)
 
 ## Team
 
