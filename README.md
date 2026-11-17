@@ -13,6 +13,19 @@ A community reporting platform for problems with public projects. Citizens can r
 - **How it works** — Step-by-step guide with FAQ section
 - **Bilingual (EN/FIL)** — Toggle between English and Filipino, persisted in localStorage
 
+### Feature overview
+
+![Tugon feature overview](public/features.png)
+
+## Team
+
+| Member | Role |
+|---|---|
+| Charles | Team Leader |
+| Ryan | UI/UX Designer |
+| Bryan | Backend Developer |
+| Yohan | AI/Data Analyst |
+
 ## Tech Stack
 
 | Layer | Technology |
